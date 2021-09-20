@@ -56,7 +56,7 @@ program simple
             close(101)                                          ! cierro archivo output.dat
 
             print *,"Porcentaje de salida: ",real(j)/real(N)
-            !!call execute_command_line('gnuplot output.dat')
+            call execute_command_line("gnuplot plot_output.sh")
     else
             print *,"Finaliza el programa porque no existe input.dat"
     end if
