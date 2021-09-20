@@ -21,5 +21,4 @@ $(exe):  $(OBJS) Makefile
 clean:
 	rm ./*.o ./*.mod	
 
-nueva linea git
 problema1d.o: problema1d.f90 ziggurat.o
