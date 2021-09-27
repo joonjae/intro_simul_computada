@@ -19,6 +19,7 @@ FUNCTION funcion_x( x , y , filenumb ) RESULT( hits )
               hits = 1
       end if
 
+      print *,"hola mundo"
       RETURN
 END FUNCTION funcion_x
 
