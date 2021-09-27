@@ -126,9 +126,9 @@ print *, "El numero N es:", n
 print *, "El numero de Generados sampliando una gausiana:", cont_g
 print *, "La proporcion Generados/N:", a
 print *, "Numero de aceptados:", cont_ac
-print *, "La proporcion Aceptados/generasdos:", b
-print *, "La integral es:", b/2.0
-print *, "La integral teorica es 1/3"
+print *, "La proporcion Aceptados/Generasdos:", b
+print *, "La integral es:", b
+print *, "La integral teorica es 2/3"
 
 close(2)
 close(3)
