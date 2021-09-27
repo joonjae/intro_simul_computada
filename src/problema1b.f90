@@ -5,6 +5,7 @@ program simple
     integer :: seed,N,i ,j,k
     real :: x , y
 
+!! Muy bien 
 ![NO TOCAR] Inicializa generador de número random
 
     inquire(file='seed.dat',exist=es)
