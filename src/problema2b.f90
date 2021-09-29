@@ -70,8 +70,10 @@ program simple
                 if( randx>=0 .and. randx<=2)then
                     if(mod(i,2)==0)then
                         x = randx+0.177
+                        !x = randx-1
                     else
                         x = -randx+1.813
+                        !x = -randx+3
                     end if
                     if( x>0 .and. x<2)then
                         y = rexp()
@@ -109,10 +111,11 @@ program simple
                 if(randy>=0)then
                     y = randy
                     if( randx > 0 ) then
-                        !x = randx - 1.45 ! .34
-                        !x = randx - 1.42 ! .34
-                        x = randx - 1.39 ! .
-                        if( x > 0 )then
+                        !x = randx - 1.45 
+                        !x = randx - 1.42
+                        x = randx - 1.41
+                        !x = randx - 1.35
+                        if( x > 0 .and. x < 2 )then
                                 if( funcion_x( x , y )==1 )then
                                         rnor_hits = rnor_hits + 1
                                         write(file_rnor ,*) x , y
@@ -120,10 +123,11 @@ program simple
                                 i = i+1
                         end if
                     else
-                        !x = randx + 3.45 ! .34
-                        !x = randx + 3.42 ! .34
-                        x = randx + 3.39 ! .
-                        if( x < 2 )then
+                        !x = randx + 3.45 
+                        !x = randx + 3.42 
+                        x = randx + 3.41
+                        !x = randx + 3.35
+                        if( x < 2 .and. x > 0 )then
                                 if( funcion_x( x , y )==1 )then
                                         rnor_hits = rnor_hits + 1
                                         write(file_rnor ,*) x , y
