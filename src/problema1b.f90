@@ -23,6 +23,7 @@ program simple
 
 ! Ej: Número random en [0,1]: uni()
 
+print *,"hola"
 
     inquire(file='input.dat',exist=es)
     if(es)then
