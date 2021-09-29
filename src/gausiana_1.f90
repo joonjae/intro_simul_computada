@@ -1,9 +1,10 @@
-program ejercicio_1
+program gausiana_1
 	use ziggurat
 	implicit none
 	logical :: es
-	integer :: seed, i, j, n, cont,nbins
-	real:: x,y,a,b,suma,centro, delta,k, maximo, minimo,x2
+	integer :: seed, i, j, n, cont_g ,cont_ac,nbins
+	real:: x,y,a,b,suma,centro, delta,k, maximo, minimo
+	real, parameter:: pi = 3.1415927 
 	real (kind=8), allocatable :: x1(:), y1(:),hist(:),hist_n(:),limites(:)
 	 
 ![NO TOCAR] Inicializa generador de número random
@@ -31,6 +32,10 @@ open(4, file=  'histograma.dat', status='old')
 read(1,*) n
 close(1)
 
+cont_g=0
+cont_ac=0
+
+
 allocate(x1(n),y1(n))
 k=1.0
 	   do i = 1, n
@@ -44,17 +49,20 @@ k=1.0
 		     
 		   	   
 		   if (x>=0.and.x<=2) then 
-		   
+		   cont_g=cont_g+1
 		   write(3,*) i, x, y  
 		   
 		   b=(x-1-0)**2.0
 		   b=k*b
+		   b=b/exp(-x**2.0/2.0)
+		   b=b*(2*Pi)**0.5
+		   !b=b*2
 		   if (b>=y) then 
-			  cont=cont+1
+			  cont_ac=cont_ac+1
       		  !print *,i,x,y,cont               
 			  x1(i)=x
 			  y1(i)=y
-			  write(2,*) i, x, y, cont  
+			  write(2,*) i, x, y, cont_g,cont_ac
 			  !write(2,fmt="(1i5,x,2f16.5,x,1i5,x,a)") i, b, x, y, cont  
 		   end if   
 		   end if 
@@ -94,7 +102,7 @@ hist(:)=0
           end do 
        end do        
       
-hist(:)=hist(:)/dble(cont)      
+hist(:)=hist(:)/dble(cont_ac)      
 
 b=limites(2)-limites(1)
 b=b/2.0
@@ -110,12 +118,17 @@ end do
 print *, "  " 
 print *, " Suma : " , suma  
 
-a=dble(cont)/dble(n)
+a=dble(cont_g)/dble(n)
+b=dble(cont_ac)/dble(cont_g)
 
 print *, "    "   
 print *, "El numero N es:", n
-print *, "El numero que cumple es:", cont
-print *, "La proporcion es:", a
+print *, "El numero de Generados sampliando una gausiana:", cont_g
+print *, "La proporcion Generados/N:", a
+print *, "Numero de aceptados:", cont_ac
+print *, "La proporcion Aceptados/Generasdos:", b
+print *, "La integral es:", b
+print *, "La integral teorica es 2/3"
 
 close(2)
 close(3)
@@ -144,4 +157,4 @@ close(3)
 		close(10)
 ![FIN no Tocar]        
 
-end program ejercicio_1
+end program gausiana_1
