@@ -1,1 +1,1 @@
-plot 'output_rnor.dat'; pause -1
+plot 'output_rexp.dat'; pause -1

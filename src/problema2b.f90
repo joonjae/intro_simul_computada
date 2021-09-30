@@ -40,8 +40,11 @@ program simple
             do i = 1, N
                     x = uni()*2.
                     y = uni()
-
-                    uni_hits = uni_hits + funcion_x( x , y , file_rexp)
+                    
+                    if( funcion_x( x , y )==1 ) then
+                        uni_hits = uni_hits + 1
+                        write(101 ,*) x , y
+                    end if
             end do
             call CPU_TIME(time_end)
             time_proc_uni = time_end - time_begin
@@ -55,42 +58,84 @@ program simple
 !            close(102)
 
             !! Simulacion con rutina "rexp()"
-            file_rexp = 101
+            file_rexp = 102
             open(unit=file_rexp,file='output_rexp.dat',status='unknown')   ! abro o creo archivo output.dat
             rexp_hits = 0
             call CPU_TIME(time_begin)
-            do i = 1, N 
-                    randx = rexp()
+            i = 0
+            do while ( i < N ) 
+!                write(file_rexp,*) -rexp()+2,rexp()
+!                i = i+1
+                randx = rexp()
+                if( randx>=0 .and. randx<=2)then
                     if(mod(i,2)==0)then
-                        x = randx+1
+                        x = randx+0.177
+                        !x = randx-1
                     else
-                        x = -randx+1
+                        x = -randx+1.813
+                        !x = -randx+3
                     end if
-                    y = rexp()
-
-                    rexp_hits = rexp_hits + funcion_x( x , y , file_rexp)
+                    if( x>0 .and. x<2)then
+                        y = rexp()
+                        if(y<1)then
+                            if( funcion_x( x , y ) == 1 )then
+                                    rexp_hits = rexp_hits + 1
+                                    write(file_rexp ,*) x , y
+                            end if
+                            i = i+1
+                        end if
+                    end if
+                end if
             end do
             call CPU_TIME(time_end)
             time_proc_rexp = time_end - time_begin
             close(file_rexp)                                          ! cierro archivo output.dat
 
             !! Simulacion con rutina "rnor()"
-            file_rnor = 101
+            file_rnor = 103
             open(unit=file_rnor,file='output_rnor.dat',status='unknown')   ! abro o creo archivo output.dat
             rnor_hits = 0
             call CPU_TIME(time_begin)
-            do i = 1, N 
-                    randx = rnor()
-                    randy = rnor()
-                    if(randy>=0)then
-                        x = randx
-                        y = randy
+            i = 0
+            do while ( i < N )
+                randy = rnor()
+                randx = rnor()
+!                if(randy>0)then 
+!                        if(randx>0)then
+!                                write(file_rnor,*) randx-1,randy
+!                        else
+!                                write(file_rnor,*) randx+3,randy
+!                        end if
+!                        i = i+1
+!                end if
+                if(randy>=0)then
+                    y = randy
+                    if( randx > 0 ) then
+                        !x = randx - 1.45 
+                        !x = randx - 1.42
+                        x = randx - 1.41
+                        !x = randx - 1.35
+                        if( x > 0 .and. x < 2 )then
+                                if( funcion_x( x , y )==1 )then
+                                        rnor_hits = rnor_hits + 1
+                                        write(file_rnor ,*) x , y
+                                end if
+                                i = i+1
+                        end if
                     else
-                        x = randx+2
-                        y = -randy
+                        !x = randx + 3.45 
+                        !x = randx + 3.42 
+                        x = randx + 3.41
+                        !x = randx + 3.35
+                        if( x < 2 .and. x > 0 )then
+                                if( funcion_x( x , y )==1 )then
+                                        rnor_hits = rnor_hits + 1
+                                        write(file_rnor ,*) x , y
+                                end if
+                                i = i+1
+                        end if
                     end if
-
-                    rnor_hits = rnor_hits + funcion_x( x , y , file_rnor)
+                end if
             end do
             call CPU_TIME(time_end)
             time_proc_rnor = time_end - time_begin
@@ -105,7 +150,7 @@ program simple
             print *,"Porcentaje de salida rnor: ",real(rnor_hits)/real(N)
 
 
-            call execute_command_line("gnuplot plot_output.sh")
+            !call execute_command_line("gnuplot plot_output.sh")
     else
             print *,"Finaliza el programa porque no existe input.dat"
     end if
