@@ -3,11 +3,12 @@ program issing_1
 	implicit none
 	
 	logical :: es
-	integer :: seed, i, j, nissing, niter,nmatriz,n,f,c,M,cont_no_cambia,cont_dE_menor_que_uni,cont_dE_menor_que_cero
+	integer :: seed, i, j, nising, niter,nmatriz,n,f,c,M,cont_no_cambia,cont_dE_menor_que_uni,cont_dE_menor_que_cero
 	!logical :: parar
 	real:: suma,x, dE, beta, KT,p,E
 	real, parameter:: Jota=1, Ho=0, T=0.01, K=1 
-	real (kind=8), allocatable :: S(:,:), Magnetizacion(:),Emedia(:)
+	real (kind=8), allocatable :: Magnetizacion(:),En(:)
+	integer, allocatable:: S(:,:)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
 !! Revisar formulas 
 !! Agregar un contador para todos los casos 
@@ -38,12 +39,12 @@ open(1, file = 'input.dat',status='old')
 !open(3, file = 'distribucion.dat', status='old') 
 !open(4, file=  'histograma.dat', status='old')
 open(5, file= 'Magnetizacion.dat',status='old')
-open(16, file= 'S.dat',status='old') !! si tomo el numero 6 no escribe en pantalla
+open(16, file= 'S.dat',status='old') !! Ojo porque uni=6 es pantalla no se puede usar 
 !!!!!!!!!
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
 !!! inicializo 
-nissing=20 
+nising=20
 nmatriz=50!! esto esta por ahora para no repetir la filas y columas 
 !niter=2000000
 read(1,*) niter
@@ -55,11 +56,8 @@ KT=K*T
 
 !!!!!
 !!! alocate 
-allocate(S(nmatriz,nmatriz), Magnetizacion(niter),Emedia(niter))	
+allocate(S(nmatriz,nmatriz), Magnetizacion(niter),En(niter))
 !!!!!!!
-
-
-
 
 !!!!!!!!!!!!!!!!!
 !!! Modelo de Ising 
@@ -74,10 +72,15 @@ do i=1,nmatriz
    x=-1
    end if
    S(i,j)=x 
-   write(16,*) "S(",i,",",j,"):", x 
+   !write(16,*) "S(",i,",",j,"):", x 
    !print *, "i: ", i , "j: ", j, x
 end do 
-end do 
+end do
+
+do f=10,nising+10 
+   write(16,*) (S(f,c),c=10,nising+10)
+   !write(16,fmt="(i5)") (S(f,c), c=1, nising)  
+   end do 
 close(16)
 
 cont_no_cambia=0
@@ -86,12 +89,14 @@ cont_dE_menor_que_uni=0
 !print *, " " 
 !print *, "Selecciono las filas y columas"
 
-!write(5,*) "# n , Magnetizacion(n), Emedia(n)"
+write(5,*) "# n , Magnetizacion(n), Emedia(n)"
 do n=1,niter
    !do i=1,nissing
      ! do j=1,nissing 
-        f=nint(uni()*nissing)+1  !init redondea 
-        c=nint(uni()*nissing)+1
+        !! lo corro para que no de el 1,1 
+        !! cuando lo ponga en forma de toroide usar 1       
+        f=nint(uni()*nising)+10 !init redondea 
+        c=nint(uni()*nising)+10 
         !print *," "
         !print *, " Eleccion, fila: ", f, "columna :",c
         !! calculo el delta E 
@@ -118,29 +123,25 @@ do n=1,niter
           !print *, "No se cambia el spin"
           cont_no_cambia=cont_no_cambia+1
           end if
+              
         end if  
-   !end do 
-  !end do 
-  !!
-  M=0
-  E=0
+          M=0
+          E=0
+          !! esta desde 10 porque esta corrida
+          do f=10,nising+10 
+            do c=10,nising+10 
+              M=M+S(f,c)
+              E=E+S(f,c)*(S(f+1,c)+S(f,c+1)+S(f-1,c)+S(f,c-1))-Ho*S(f,c)      
+           end do 
+         end do 
+         Magnetizacion(n)=M
+         En(n)=E      
+         write(5,fmt="(i7,x,f10.4,x,f10.4)") n , Magnetizacion(n), En(n)  
   
-  do f=1,nissing 
-    do c=1,nissing 
 
-    M=M+S(f,c)
-    E=S(f,c)*(S(f+1,c)+S(f,c+1)+S(f-1,c)+S(f,c-1))-Ho*S(f,c)
-     
-    end do 
-  end do 
-  Magnetizacion(n)=dble(M)/dble((nissing)**2)
-  Emedia(n)=dble(n)/dble((nissing)**2)
-  write(5,fmt="(i5,x,f10.4,x,f10.4)") n , Magnetizacion(n), Emedia(n) 
 end do 
 
 close(5)
-
-
 
 print *, " " 
 print *, "Temperatura [K]:", T 
