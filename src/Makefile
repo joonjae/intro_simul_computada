@@ -1,11 +1,11 @@
 MAKEFILE = Makefile
-exe = problema2b
+exe = problema_ising
 fcomp = gfortran #ifort # /opt/intel/compiler70/ia32/bin/ifc  
 # Warning: the debugger doesn't get along with the optimization options
 # So: not use -O3 WITH -g option
 flags =  -O3  
 # Remote compilation
-OBJS = ziggurat.o mymodule.o problema2b.o
+OBJS = ziggurat.o mymodule.o problema_ising.o
 
 .SUFFIXES:            # this deletes the default suffixes 
 .SUFFIXES: .f90 .o    # this defines the extensions I want 
@@ -21,4 +21,4 @@ $(exe):  $(OBJS) Makefile
 clean:
 	rm ./*.o ./*.mod	
 
-problema2b.o: problema2b.f90 ziggurat.o mymodule.o
+problema2b.o: problema_ising.f90 ziggurat.o mymodule.o
