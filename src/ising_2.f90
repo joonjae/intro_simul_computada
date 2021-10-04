@@ -3,12 +3,12 @@ program issing_1
 	implicit none
 	
 	logical :: es
-	integer :: seed, i, j, nising, niter,nmatriz,n,f,c,M,cont_no_cambia,cont_dE_menor_que_uni,cont_dE_menor_que_cero
+	integer :: seed, i, j, nising, niter,nmatriz,n,f,c,f1,c1,M,cont_no_cambia,cont_dE_menor_que_uni,cont_dE_menor_que_cero,E
 	!logical :: parar
-	real:: suma,x, dE, beta, KT,p,E
-	real, parameter:: Jota=1, Ho=0, T=0.01, K=1 
-	real (kind=8), allocatable :: Magnetizacion(:),En(:)
-	integer, allocatable:: S(:,:)
+	real:: suma,x, dE, beta, KT,p
+	real, parameter:: Jota=1, Ho=0, K=1, T=5 
+	!real (kind=8), allocatable :: 
+	integer, allocatable:: S(:,:),Magnetizacion(:),En(:)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
 !! Revisar formulas 
 !! Agregar un contador para todos los casos 
@@ -40,13 +40,14 @@ open(1, file = 'input.dat',status='old')
 !open(4, file=  'histograma.dat', status='old')
 open(5, file= 'Magnetizacion.dat',status='old')
 open(16, file= 'S.dat',status='old') !! Ojo porque uni=6 es pantalla no se puede usar 
+open(7, file='S1.dat',status='old')
 !!!!!!!!!
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
 !!! inicializo 
 nising=20
 nmatriz=50!! esto esta por ahora para no repetir la filas y columas 
-!niter=2000000
+!niter=1
 read(1,*) niter
 close(1)
 print *,  " " 
@@ -77,8 +78,8 @@ do i=1,nmatriz
 end do 
 end do
 
-do f=10,nising+10 
-   write(16,*) (S(f,c),c=10,nising+10)
+do f=10,nising+9 
+   write(16,*) (S(f,c),c=10,nising+9)
    !write(16,fmt="(i5)") (S(f,c), c=1, nising)  
    end do 
 close(16)
@@ -89,14 +90,14 @@ cont_dE_menor_que_uni=0
 !print *, " " 
 !print *, "Selecciono las filas y columas"
 
-write(5,*) "# n , Magnetizacion(n), Emedia(n)"
+write(5,*) "#   n // T[K] // f // c // M // E"
 do n=1,niter
    !do i=1,nissing
      ! do j=1,nissing 
         !! lo corro para que no de el 1,1 
         !! cuando lo ponga en forma de toroide usar 1       
         f=nint(uni()*nising)+10 !init redondea 
-        c=nint(uni()*nising)+10 
+        c=nint(uni()*nising)+10
         !print *," "
         !print *, " Eleccion, fila: ", f, "columna :",c
         !! calculo el delta E 
@@ -128,20 +129,27 @@ do n=1,niter
           M=0
           E=0
           !! esta desde 10 porque esta corrida
-          do f=10,nising+10 
-            do c=10,nising+10 
-              M=M+S(f,c)
-              E=E+S(f,c)*(S(f+1,c)+S(f,c+1)+S(f-1,c)+S(f,c-1))-Ho*S(f,c)      
-           end do 
+          do f1=10,nising+9
+            do c1=10,nising+9
+              M=M+S(f1,c1)
+              E=E+S(f1,c1)*(S(f1+1,c1)+S(f1,c1+1)+S(f1-1,c1)+S(f1,c1-1))-Ho*S(f1,c1)      
+              !print *," fila: ",f1, "Columna", c1 
+            end do 
          end do 
          Magnetizacion(n)=M
          En(n)=E      
-         write(5,fmt="(i7,x,f10.4,x,f10.4)") n , Magnetizacion(n), En(n)  
+         write(5,fmt="(i7,x,f10.3,x,i5,x,i5,x,x,i5,x,x,i5)") n, T,f,c, Magnetizacion(n), En(n)
   
 
 end do 
 
 close(5)
+
+do f=10,nising+9
+   write(7,*) (S(f,c),c=10,nising+9)  
+end do 
+close(7)
+
 
 print *, " " 
 print *, "Temperatura [K]:", T 
