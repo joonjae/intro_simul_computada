@@ -16,22 +16,26 @@ program problema_ising
     integer :: dim_mapa
 
     integer :: ier,pgbeg ! para referenciar al inicio de pgplot
+
     integer, allocatable :: ip(:),im(:) ! para ir mapeando cuales son los vecinos
     real :: N0, U, T, H
-    integer :: N_MC
-    integer :: imc, i_in, N_INTER, i_area, area
+    integer :: N_MC, N_INTER
+    integer :: imc, i_in
+    integer :: i_area, area
     integer :: isum
-    real :: energia_antigua, energia_nueva, delta_energia, ising
+    real :: energia_antigua, energia_nueva, delta_energ_beta, ising
 
     real :: ht, ut
-    real :: densidad, pasos
+    real :: r, prob_acept
+    !real :: densidad, pasos
+
     ! Inicio generador nro random
     inquire(file='seed.dat',exist=es)
     if(es) then
         open(unit=10,file='seed.dat',status='old')
         read(10,*) seed
         close(10)
-        print *,"  * Leyendo semilla de archivo seed.dat"
+    !    print *,"  * Leyendo semilla de archivo seed.dat"
     else
         seed = 24583490
     end if
@@ -53,7 +57,9 @@ program problema_ising
     inquire(file='input_ising.dat',exist=es)
     if(es) then
         open(unit=1,file='input_ising.dat',status='old')
+        read(1,*)
         read(1,*) N0 ,U ,T, H
+        read(1,*)
         read(1,*) N_MC, N_INTER
         close(1)
         print *,"  * leyendo datos de input_ising.dat"
@@ -75,25 +81,26 @@ program problema_ising
     dim_mapa = size(shape(mapa))    ! verifico la dimension
     allocate(init_pos(dim_mapa))    ! reservo memoria para la posicion inicial dentro del mapa
 
+    print *,"dim:",dim_mapa," size:",shape(mapa)
+
     call init_mapa(mapa,L)          ! inicio el mapa 
-    !do j=1,L                            
-    !    write(*,*) (mapa(i,j), i=1,L)   ! muestro por pantalla el mapa
-    !end do
+    do j=1,L                            
+        write(*,*) (mapa(i,j), i=1,L)   ! muestro por pantalla el mapa
+    end do
 
     call plot_mapa(ier,mapa,L)
 
     call rand_pos(L,dim_mapa,init_pos)      ! pido una posicion aleatoria en el "init_pos"
     print *,init_pos                    ! muestro por pantalla "init_pos"
 
-
     ut = U/T
     ht = H/T
 
     area = L*L
-    densidad = 1./real(area)
-    pasos = 1./real(N_MC)
+    !densidad = 1./real(area)
+    !pasos = 1./real(N_MC)
 
-    
+    !
     allocate(ip(L))             ! reservo memoria para suma vecinos
     allocate(im(L))             ! reservo memoria para restar vecinos
 
@@ -107,26 +114,56 @@ program problema_ising
     do imc=1, N_MC
         do i_in=1, N_INTER
             do i_area=1, area
-                i = int(L*uni()*0.99999999999999999) + 1
-                j = int(L*uni()*0.99999999999999999) + 1
+                i = nint(L*uni()) + 1
+                j = nint(L*uni()) + 1
+                if(i>L)then
+                    i=L
+                end if
+                if(j>L)then
+                    j=L
+                end if
                 isum = mapa(im(i),j)+mapa(ip(i),j)+mapa(i,im(j))+mapa(i,ip(j))
+                !print *,"posicion",i,j
+                !print *,"suma",isum
                 energia_antigua = -ut*mapa(i,j)*isum - ht
                 energia_nueva   =  ut*mapa(i,j)*isum + ht
-                delta_energia   =  exp(energia_antigua - energia_nueva)
-                if(uni() < delta_energia)then
+                delta_energ_beta   = energia_nueva - energia_antigua
+                if(delta_energ_beta<0)then
+                    !para plotear
                     ising = (mapa(i,j)+3)/2
                     call pgsci(0)
                     call pgsfs(ising)
-                    call pgcirc(real(i),real(j),1./4.)
-                    mapa(i,j) = -mapa(i,j)
+                    call pgcirc(real(i),real(j),0./4.)
+
+                    mapa(i,j) = -1.*mapa(i,j) ! invertimos
+                    print *,"invierte",i,j
+
+                    !para plotear modificando color
                     ising = (mapa(i,j)+3)/2
                     call pgsci(ising)
                     call pgsfs(ising)
                     call pgcirc(real(i),real(j),1./4.)
-                    print *,"acepta"
-                !else
-                    !print *,"no acepta"
+                else
+                    prob_acept = exp(-delta_energ_beta)
+                    r = uni()
+                    if( r < prob_acept )then
+                        !para plotear
+                        ising = (mapa(i,j)+3)/2
+                        call pgsci(0)
+                        call pgsfs(ising)
+                        call pgcirc(real(i),real(j),1./4.)
+
+                        mapa(i,j) = -1.*mapa(i,j) ! invertimos
+                        print *,"invierte",i,j
+
+                        !para plotear modificando color
+                        ising = (mapa(i,j)+3)/2
+                        call pgsci(ising)
+                        call pgsfs(ising)
+                        call pgcirc(real(i),real(j),1./4.)
+                    end if
                 end if
+                !call plot_mapa(ier,mapa,L)
             end do
         end do
     end do

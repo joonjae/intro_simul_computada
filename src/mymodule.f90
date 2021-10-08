@@ -68,20 +68,36 @@ subroutine rand_pos(nsize,ndim,rpos)
     integer i
     integer rvar
     integer, intent(in) :: nsize, ndim
-    integer, intent(out) :: rpos(0:ndim-1)
+    integer, intent(out) :: rpos(ndim)
 
-    i = 0
-    do while (i<ndim)
-        rvar = abs(shr3())
-        !if( 0<rvar .and. rvar<=nsize )then
-        if( rvar<=nsize )then
-            rpos(i) = rvar
-            i = i + 1
-        end if
+    do i=1,ndim
+        rpos(i) = nint(uni()*nsize)+1
+        if(rpos(i)>nsize)then
+            rpos(i) = nsize
+        endif
     end do
     return
 
 end subroutine rand_pos
+!subroutine rand_pos(nsize,ndim,rpos)
+!    implicit none
+!    integer i
+!    integer rvar
+!    integer, intent(in) :: nsize, ndim
+!    integer, intent(out) :: rpos(0:ndim-1)
+!
+!    i = 0
+!    do while (i<ndim)
+!        rvar = abs(shr3())
+!        !if( 0<rvar .and. rvar<=nsize )then
+!        if( rvar<=nsize )then
+!            rpos(i) = rvar
+!            i = i + 1
+!        end if
+!    end do
+!    return
+!
+!end subroutine rand_pos
 !subroutine rpos_mapa(mapa,n,npos,pos)
 !    implicit none
 !    integer i
