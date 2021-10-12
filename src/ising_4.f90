@@ -4,7 +4,7 @@ program issing_1
 	
 	logical :: es
 	integer :: seed, i, j,L, niter,nmatriz,n,f,c,f1,c1,M,cont_no_cambia,cont_dE_menor_que_uni,cont_dE_menor_que_cero,E
-	real (kind=8):: suma,x, dE, beta, KT,p,Mmedia,Emedia,Mcuadrado,Ecuadrado,desvM,desvE,cambia,no_cambia,Ho, T,Jota
+	real (kind=8):: suma,x,dE,KT,p,Mmedia,Emedia,Mcuadrado,Ecuadrado,desvM,desvE,cambia,no_cambia,Ho, T,Jota,varM,varE
 	real, parameter::  K=1
 	integer, allocatable:: S(:,:),Mn(:),aceptado(:)
 	real (kind=8), allocatable :: En(:) !por que multiplico por 0.5 es real 
@@ -122,7 +122,8 @@ do n=1,niter
           aceptado(n)=1
         else 
           !! Boltzmann probability of flipping
-          p=exp(-dE/KT) !!Boltzman
+          p=exp(-1.0*dE/KT) !!Boltzman
+          !if (uni()>p) then 
           if (uni()<p) then  
               !! acepto el nuevo estado 
               cont_dE_menor_que_uni=cont_dE_menor_que_uni+1
@@ -179,7 +180,7 @@ do n=1,niter
                         
          
          
-         write(12,fmt="(i7,x,i5,x,x,f10.5,x,x,f10.5)") n,aceptado(n),dble(Mn(n))/dble(L**2),En(n)/dble(L**2)             
+         write(12,fmt="(i7,x,i5,x,x,i5x,x,f12.3)") n,aceptado(n),Mn(n),En(n)             
              
 end do 
 
@@ -214,13 +215,16 @@ do i=1,niter
 end do 
 
 
-Emedia=Emedia/dble(niter)
-Mmedia=Mmedia/dble(niter)
-Mcuadrado=Mcuadrado/dble(niter)
-Ecuadrado=Ecuadrado/dble(niter)
+Emedia=dble(Emedia)/(dble(niter)*dble(L**2))
+Mmedia=dble(Mmedia)/(dble(niter)*dble(L**2))
+Mcuadrado=dble(Mcuadrado)/(dble(niter)*dble(L**2))
+Ecuadrado=dble(Ecuadrado)/(dble(niter)*dble(L**2))
 
-desvE=(Ecuadrado-Emedia**2)**0.5
-desvM=(Mcuadrado-Mmedia**2)**0.5
+varE=(Ecuadrado-Emedia**2)
+varM=(Mcuadrado-Mmedia**2)
+
+desvE=varE**0.5
+desvM=varM**0.5
 
 cont_dE_menor_que_cero=dble(cont_dE_menor_que_cero)/dble(niter)
 cont_dE_menor_que_uni=dble(cont_dE_menor_que_uni)/dble(niter)
@@ -238,21 +242,33 @@ no_cambia=dble(cont_no_cambia)/dble(niter)
 !print *, " "
 !print  '(" No cambia %:" f10.4)', 100*dble(cont_no_cambia)/dble(niter)
 !print *, " --------------------"
-!print *, " " 
-!!print *, " "
-!!print '(" Energia cuadrado por Spin" f10.4)', Ecuadrado
-!print *, " " 
-!print '(" Desviacion de E:" f10.4)',desvE
-!print *, " "   
-!print '(" M Media por Spin:" f10.4)', Mmedia
-!print *," " 
-!!print '(" M cuadrado por Spin" f10.4)', Mcuadrado
-!!print *, " " 
-!print '(" Desviacion de M: " f10.4)', desvM
-!print *, " --------------------"
 
-write(15,*) " #1 Emedi // #2 desvE // #3 Mmedia // #4 desM // #5 cambia // #6 no_cambia // T: ", T
-write(15,fmt="(6f10.5)") Emedia, desvE, Mmedia, desvM, cambia, no_cambia
+write(15,*) " Temperatura [K] :"
+write(15,1) T
+write(15,*) "-------------------"
+write(15,*) " E media por S : "  
+write(15,2) Emedia 
+write(15,*) " Varianza de E: " 
+write(15,2) varE 
+write(15,*) " Desviacion de E: " 
+write(15,2) desvE 
+write(15,*) "-------------------"
+write(15,*) " M media por S: " 
+write(15,2) abs(Mmedia)
+write(15,*) " Varianza de M: " 
+write(15,2)  varM
+write(15,*) " Desviacion de M: " 
+write(15,2)  desvM
+write(15,*) " Desviacion de E: " 
+write(15,2) desvE 
+write(15,*) "-------------------"
+write(15,*) " Cambia: " 
+write(15,1) cambia
+write(15,*) " No cambia: " 
+write(15,1)  no_cambia 
+1   format(f10.3)
+2   format(f12.5)
+!write(15,fmt="(8f10.5)") Emedia, varE,desvE, abs(Mmedia), varM, desvM, cambia, no_cambia
 close(15)
 close(12)    
 
