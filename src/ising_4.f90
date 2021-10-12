@@ -44,18 +44,16 @@ read(11,*) L
 read(11,*) Jota
 read(11,*) Ho
 close(11)
-print *,  " " 
-print *, "Numero de Iteraciones : ", niter 
-print *,  " " 
-print  '(" Temperatura:" f10.4)', T
-print *,  " " 
-print *, "Tamaño de matriz : ", L
-print *,  " " 
-print  '(" Valor de J:" f10.4)', Jota
-print *, " "
-print  '(" Campo externo:" f10.4)', Ho
-
-
+!print *,  " " 
+!print *, "Numero de Iteraciones : ", niter 
+!print *,  " " 
+!print  '(" Temperatura:" f10.4)', T
+!print *,  " " 
+!print *, "Tamaño de matriz : ", L
+!print *,  " " 
+!print  '(" Valor de J:" f10.4)', Jota
+!print *, " "
+!print  '(" Campo externo:" f10.4)', Ho
 
 !!!!!
 !!! alocate 
@@ -245,6 +243,12 @@ no_cambia=dble(cont_no_cambia)/dble(niter)
 
 write(15,*) " Temperatura [K] :"
 write(15,1) T
+write(15,*) " Tamaño de Matriz  :"
+write(15,3) L
+write(15,*) " Valor de J :"
+write(15,1) Jota
+write(15,*) " Campo Magnetico externo Ho :"
+write(15,1) Ho
 write(15,*) "-------------------"
 write(15,*) " E media por S : "  
 write(15,2) Emedia 
@@ -268,6 +272,7 @@ write(15,*) " No cambia: "
 write(15,1)  no_cambia 
 1   format(f10.3)
 2   format(f12.5)
+3   format (i5) 
 !write(15,fmt="(8f10.5)") Emedia, varE,desvE, abs(Mmedia), varM, desvM, cambia, no_cambia
 close(15)
 close(12)    
