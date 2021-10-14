@@ -25,10 +25,12 @@ program problema_ising
     integer :: isum
     real :: energia_antigua, energia_nueva, delta_energ_beta, ising
     real :: sumep, summp, xetot, xe2tot, xmtot, xm2tot
+    real :: xmagnet, xenergy, xmag2, xener2
+    real :: suscept, cv
 
     real :: ht, ut
     real :: r, prob_acept
-    real :: densidad, pasos
+    real :: densidad, pasos_mc
     
     integer :: n_changes
 
@@ -86,24 +88,30 @@ program problema_ising
 
     !print *,"dim:",dim_mapa," size:",shape(mapa)
 
-    call init_mapa(mapa,L)          ! inicio el mapa 
+    !call init_mapa(mapa,L)          ! inicio el mapa 
     !do j=1,L                            
     !    write(*,*) (mapa(i,j), i=1,L)   ! muestro por pantalla el mapa
     !end do
+    do j=1,L
+        do i=1,L
+            mapa(i,j)=1 ! inicio el mapa en 1
+        end do
+    end do
 
     call plot_mapa(ier,mapa,L)
 
-    call rand_pos(L,dim_mapa,init_pos)      ! pido una posicion aleatoria en el "init_pos"
+    !call rand_pos(L,dim_mapa,init_pos)      ! pido una posicion aleatoria en el "init_pos"
     !print *,init_pos                    ! muestro por pantalla "init_pos"
 
     area = L*L
-    densidad = 1./real(area)
-    !pasos = 1./real(N_MC)
+    densidad = 1./real(area)    ! densidad de area
+    pasos_mc = 1./real(N_MC)       ! densidad o pasos de monte carlo
 
     !
     allocate(ip(L))             ! reservo memoria para suma vecinos
     allocate(im(L))             ! reservo memoria para restar vecinos
 
+    ! me va a ayudar para el calculo de condicion de contorno
     do i=1, L
         ip(i) = i+1
         im(i) = i-1
@@ -113,9 +121,10 @@ program problema_ising
 
     open(3, file='ising.dat',status='unknown')
     open(4, file='cambios.dat',status='unknown')
+    open(5, file='fluct_caloresp_suscept.dat',status='unknown')
     T = T0
-    do while(T < T0+3.5)
-        ut = U/T
+    do while(T < T0+2.5)
+        ut = U/T    ! 1/K.T
         ht = H/T
 
         xetot = 0.
@@ -178,6 +187,7 @@ program problema_ising
             sumep = 0.
             summp = 0.
 
+            ! Calculo de energia y magnetizacion
             do j=1,L
                 do i=1,L
                     isum = mapa(im(i),j)+mapa(ip(i),j)+mapa(i,im(j))+mapa(i,ip(j))
@@ -186,30 +196,42 @@ program problema_ising
                 end do
             end do
 
-            sumep = 0.5*sumep*densidad
-            xetot = xetot + sumep
-            xe2tot = xe2tot + sumep*sumep
+            sumep = 0.5*sumep*densidad      ! Energia interna
+            xetot = xetot + sumep           ! Para calcular la media de la energia
+            xe2tot = xe2tot + sumep**2      ! Para calcular la media de la energia cuadrada
 
-            summp = summp*densidad
-            xmtot = xmtot + abs(summp)
-            xm2tot = xm2tot + summp*summp
+            summp = summp*densidad          ! Magnetizacion media por espin
+            xmtot = xmtot + abs(summp)      ! Para calcular la media de la magnetizacion
+            xm2tot = xm2tot + summp**2      ! Para calcular la media de la magnetizacion cuadrada
 
-            if(mod(imc,1)==0)then
-                print *, imc, sumep, xetot/real(imc), summp, xmtot/real(imc)
-            end if
+            !if(mod(imc,1)==0)then
+            !    print *, imc, sumep, xetot/real(imc), summp, xmtot/real(imc)
+            !end if
 
         end do
-        !open(2, file='conf',status='unknown')
-        !do i=1,L
-        !    write(2,*) (mapa(i,j),j=1,L)
-        !end do
-        !close(2)
-        write(3,*) T, sumep, xetot/real(imc), summp, xmtot/real(imc)
-        write(4,*) T, real(n_changes)/real(imc)
+
+        xenergy = xetot / real(imc) ! la media de la energia por spin
+        xener2 = xe2tot / real(imc) ! la media de la energia cuadrada
+
+        xmagnet = xmtot / real(imc) ! la media del magnetismo por spin
+        xmag2 =  xm2tot / real(imc) ! la media del magnetismo al cuadrado
+
+        !cv = var(E)/Kb.N.T^2
+        !suscrp = N.var(M)/Kb.T
+
+        cv = (xener2 - xenergy**2)      ! Calor Especifico 
+        suscept = (xmag2 - xmagnet**2)  ! Susceptibilidad magnetica
+        !cv = ((xener2 - xenergy**2)*ut)/(T*real(imc))  ! Calor Especifico 
+        !suscept = (xmag2 - xmagnet**2)*real(imc)*ut    ! Susceptibilidad magnetica
+
+        write(3,*) T, sumep, xenergy, summp, xmagnet
+        write(4,*) T, real(n_changes)/real(imc*area)
+        write(5,*) T, cv, suscept
         T = T + 0.2
     end do
     close(3)
     close(4)
+    close(5)
 
     ! Escribir la última semilla para continuar con la cadena de numeros aleatorios 
     open(unit=10,file='seed.dat',status='unknown')
