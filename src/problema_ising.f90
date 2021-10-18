@@ -18,7 +18,7 @@ program problema_ising
     integer :: ier,pgbeg ! para referenciar al inicio de pgplot
 
     integer, allocatable :: ip(:),im(:) ! para ir mapeando cuales son los vecinos
-    real :: N0, U, T0, T, H
+    real :: N0, Jta, T0, T, H
     integer :: N_MC, N_INTER
     integer :: imc, i_in
     integer :: i_area, area
@@ -28,7 +28,7 @@ program problema_ising
     real :: xmagnet, xenergy, xmag2, xener2
     real :: var_e, var_m, suscept, cv
 
-    real :: ht, ut
+    real :: ht, beta
     real :: r, prob_acept
     real :: densidad, pasos_mc
     
@@ -55,7 +55,7 @@ program problema_ising
 
     ! Inicio lectura de input para el ising
     ! N0: nro de spin
-    ! U: Energia de interaccion
+    ! Jta: Energia de interaccion
     ! T: Temperatura
     ! H: Campo magnetico
     ! N_MC: nro de iteraciones de Monte Carlo
@@ -63,20 +63,20 @@ program problema_ising
     if(es) then
         open(unit=1,file='input_ising.dat',status='old')
         read(1,*)
-        read(1,*) N0 ,U ,T0, H
+        read(1,*) N0 ,Jta ,T0, H
         read(1,*)
         read(1,*) N_MC, N_INTER
         close(1)
 !        print *,"  * leyendo datos de input_ising.dat"
     else
         N0=0
-        U=1
+        Jta=1
         T0=1
         H=0
         N_MC=1000
     end if
     close(1)
-!    print *,"N0:",N0," U:",U ,"T:",T ,"H",H, "N_MC:",N_MC
+!    print *,"N0:",N0," Jta:",Jta ,"T:",T ,"H",H, "N_MC:",N_MC
 
     !----------------------------------------------------
 
@@ -88,15 +88,15 @@ program problema_ising
 
     !print *,"dim:",dim_mapa," size:",shape(mapa)
 
-    !call init_mapa(mapa,L)          ! inicio el mapa 
+    call init_mapa(mapa,L)          ! inicio el mapa 
     !do j=1,L                            
     !    write(*,*) (mapa(i,j), i=1,L)   ! muestro por pantalla el mapa
     !end do
-    do j=1,L
-        do i=1,L
-            mapa(i,j)=1 ! inicio el mapa en 1
-        end do
-    end do
+    !do j=1,L
+    !    do i=1,L
+    !        mapa(i,j)=1 ! inicio el mapa en 1
+    !    end do
+    !end do
 
 !    call plot_mapa(ier,mapa,L)
 
@@ -124,7 +124,7 @@ program problema_ising
     open(5, file='caloresp_suscept.dat',status='unknown')
     T = T0
     do while(T < T0+3)
-        ut = U/T    ! 1/K.T
+        beta = Jta/T    ! 1/K.T
         ht = H/T
 
         xetot = 0.
@@ -147,8 +147,8 @@ program problema_ising
                     isum = mapa(im(i),j)+mapa(ip(i),j)+mapa(i,im(j))+mapa(i,ip(j))
                     !print *,"posicion",i,j
                     !print *,"suma",isum
-                    energia_antigua = -ut*mapa(i,j)*isum - ht*mapa(i,j)
-                    energia_nueva   =  ut*mapa(i,j)*isum + ht*mapa(i,j)
+                    energia_antigua = -beta*mapa(i,j)*isum - ht*mapa(i,j)
+                    energia_nueva   =  beta*mapa(i,j)*isum + ht*mapa(i,j)
                     delta_energ_beta   = energia_nueva - energia_antigua
                     if(delta_energ_beta<0)then
                         mapa(i,j) = -1.*mapa(i,j) ! invertimos
@@ -191,12 +191,12 @@ program problema_ising
             do j=1,L
                 do i=1,L
                     isum = mapa(im(i),j)+mapa(ip(i),j)+mapa(i,im(j))+mapa(i,ip(j))
-                    sumep = sumep - U*mapa(i,j)*isum - H*mapa(i,j)
+                    sumep = sumep - Jta*mapa(i,j)*isum - H*mapa(i,j)
                     summp = summp + mapa(i,j)
                 end do
             end do
 
-            sumep = 0.5*sumep*densidad      ! Energia interna
+            sumep = sumep*densidad          ! Energia interna
             xetot = xetot + sumep           ! Para calcular la media de la energia
             xe2tot = xe2tot + sumep**2      ! Para calcular la media de la energia cuadrada
 
@@ -218,15 +218,12 @@ program problema_ising
 
 
         !cv = var(E)/Kb.N.T^2
-        !cv = (xener2 - xenergy**2)/T      ! Calor Especifico 
-        !cv = ((xener2 - xenergy**2)*ut)/(T*real(imc))  ! Calor Especifico 
         var_e = xener2 - xenergy**2
-        cv = (var_e * ut) / (T)  ! Calor Especifico 
+        cv = (var_e * beta) / (T)  ! Calor Especifico 
 
         !suscrp = N.var(M)/Kb.T
-        !suscept = (xmag2 - xmagnet**2)  ! Susceptibilidad magnetica
         var_m = xmag2 - xmagnet**2
-        suscept = var_m * real(imc) * ut    ! Susceptibilidad magnetica
+        suscept = var_m * real(imc) * beta    ! Susceptibilidad magnetica
 
         write(3,*) T, sumep, xenergy, summp, xmagnet
         write(4,*) T, real(n_changes)/real(imc*area)
