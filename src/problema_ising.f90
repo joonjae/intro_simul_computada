@@ -26,7 +26,7 @@ program problema_ising
     real :: energia_antigua, energia_nueva, delta_energ_beta, ising
     real :: sumep, summp, xetot, xe2tot, xmtot, xm2tot
     real :: xmagnet, xenergy, xmag2, xener2
-    real :: suscept, cv
+    real :: var_e, var_m, suscept, cv
 
     real :: ht, ut
     real :: r, prob_acept
@@ -48,9 +48,9 @@ program problema_ising
     !----------------------------------------------------
 
     ! Preparo el pgplot
-    ier = pgbeg(0,'/xserve',1,1)
-    if(ier .ne. 1) STOP
-    call pgenv(0,real(L+1),0,real(L+1),1,0)
+ !   ier = pgbeg(0,'/xserve',1,1)
+ !   if(ier .ne. 1) STOP
+ !   call pgenv(0,real(L+1),0,real(L+1),1,0)
     !----------------------------------------------------
 
     ! Inicio lectura de input para el ising
@@ -98,7 +98,7 @@ program problema_ising
         end do
     end do
 
-    call plot_mapa(ier,mapa,L)
+!    call plot_mapa(ier,mapa,L)
 
     !call rand_pos(L,dim_mapa,init_pos)      ! pido una posicion aleatoria en el "init_pos"
     !print *,init_pos                    ! muestro por pantalla "init_pos"
@@ -120,10 +120,10 @@ program problema_ising
     im(1) = L
 
     open(3, file='ising.dat',status='unknown')
-    open(4, file='cambios.dat',status='unknown')
-    open(5, file='fluct_caloresp_suscept.dat',status='unknown')
+    open(4, file='fraccion_aceptados.dat',status='unknown')
+    open(5, file='caloresp_suscept.dat',status='unknown')
     T = T0
-    do while(T < T0+2.5)
+    do while(T < T0+3)
         ut = U/T    ! 1/K.T
         ht = H/T
 
@@ -156,12 +156,12 @@ program problema_ising
 !                        print *,"invierte",i,j
 
                         !para plotear modificando color
-                        if( mapa(i,j) == 1 )then
-                            call pgsci(2) ! rojo
-                        else
-                            call pgsci(1) ! blanco
-                        end if
-                        call pgcirc(real(i),real(j),0.25)
+!                        if( mapa(i,j) == 1 )then
+!                            call pgsci(2) ! rojo
+!                        else
+!                            call pgsci(1) ! blanco
+!                        end if
+!                        call pgcirc(real(i),real(j),0.25)
                     else
                         prob_acept = exp(-delta_energ_beta)
                         r = uni()
@@ -172,12 +172,12 @@ program problema_ising
                             !print *,"invierte",i,j
 
                             !para plotear modificando color
-                            if( mapa(i,j) == 1 )then
-                                call pgsci(2) ! rojo
-                            else
-                                call pgsci(1) ! blanco
-                            end if
-                            call pgcirc(real(i),real(j),0.25)
+!                            if( mapa(i,j) == 1 )then
+!                                call pgsci(2) ! rojo
+!                            else
+!                                call pgsci(1) ! blanco
+!                            end if
+!                            call pgcirc(real(i),real(j),0.25)
                         end if
                     end if
                     !call plot_mapa(ier,mapa,L)
@@ -216,18 +216,22 @@ program problema_ising
         xmagnet = xmtot / real(imc) ! la media del magnetismo por spin
         xmag2 =  xm2tot / real(imc) ! la media del magnetismo al cuadrado
 
-        !cv = var(E)/Kb.N.T^2
-        !suscrp = N.var(M)/Kb.T
 
-        cv = (xener2 - xenergy**2)      ! Calor Especifico 
-        suscept = (xmag2 - xmagnet**2)  ! Susceptibilidad magnetica
+        !cv = var(E)/Kb.N.T^2
+        !cv = (xener2 - xenergy**2)/T      ! Calor Especifico 
         !cv = ((xener2 - xenergy**2)*ut)/(T*real(imc))  ! Calor Especifico 
-        !suscept = (xmag2 - xmagnet**2)*real(imc)*ut    ! Susceptibilidad magnetica
+        var_e = xener2 - xenergy**2
+        cv = (var_e * ut) / (T)  ! Calor Especifico 
+
+        !suscrp = N.var(M)/Kb.T
+        !suscept = (xmag2 - xmagnet**2)  ! Susceptibilidad magnetica
+        var_m = xmag2 - xmagnet**2
+        suscept = var_m * real(imc) * ut    ! Susceptibilidad magnetica
 
         write(3,*) T, sumep, xenergy, summp, xmagnet
         write(4,*) T, real(n_changes)/real(imc*area)
-        write(5,*) T, cv, suscept
-        T = T + 0.2
+        write(5,*) T, var_e, var_m, cv, suscept
+        T = T + 0.1
     end do
     close(3)
     close(4)
