@@ -21,19 +21,19 @@ subroutine plot_mapa(ier,mapa,nsize)
     integer, intent(in) :: nsize
     integer, intent(in) :: mapa(nsize,nsize)
 
-    do j=1,nsize
-        do i=1,nsize
-            if(mapa(i,j)==1) then
-                !call pgsfs(1) ! circulo relleno
-                !call pgsci(3) ! verde
-                call pgsci(2) ! rojo
-            else
-                !call pgsfs(2) ! circulo con contorno
-                call pgsci(1) ! blanco
-            end if
-            call pgcirc(real(i),real(j),0.25)
-        end do
-    end do 
+!    do j=1,nsize
+!        do i=1,nsize
+!            if(mapa(i,j)==1) then
+!                !call pgsfs(1) ! circulo relleno
+!                !call pgsci(3) ! verde
+!                call pgsci(2) ! rojo
+!            else
+!                !call pgsfs(2) ! circulo con contorno
+!                call pgsci(1) ! blanco
+!            end if
+!            call pgcirc(real(i),real(j),0.25)
+!        end do
+!    end do 
     return
 end subroutine 
 

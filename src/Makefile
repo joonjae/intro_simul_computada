@@ -6,7 +6,6 @@ fcomp = gfortran #ifort # /opt/intel/compiler70/ia32/bin/ifc
 # So: not use -O3 WITH -g option
 #flags =  -O3 
 flags =  -O3 
-other_ref = -L/usr/local/pgplot -L/usr/X11/lib -lpgplot -lX11
 # Remote compilation
 OBJS = ziggurat.o mymodule.o problema_ising.o
 #OBJS = ziggurat.o mymodule.o ising_2.o
@@ -15,11 +14,11 @@ OBJS = ziggurat.o mymodule.o problema_ising.o
 .SUFFIXES: .f90 .o    # this defines the extensions I want 
 
 .f90.o:  
-	$(fcomp) -c $(flags) $< $(other_ref) 
+	$(fcomp) -c $(flags) $<  
         
 
 $(exe):  $(OBJS) Makefile 
-	$(fcomp) $(flags) -o $(exe) $(OBJS) $(other_ref) 
+	$(fcomp) $(flags) -o $(exe) $(OBJS)
 
 
 clean:

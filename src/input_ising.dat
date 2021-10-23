@@ -1,4 +1,4 @@
 N0  Energ_Iter  Temp    Campo_Magnetico
 0   1           1       0
-N_MonteCarlo    N_Iteracion
-1000            1
+N_MonteCarlo    N_Iteracion     Tamanio inic matriz (LxL)
+1000            10              20
