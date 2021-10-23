@@ -26,6 +26,8 @@ program problema_ising
     real :: energia_antigua, energia_nueva, delta_energ_beta, ising
     real :: sumep, summp, xetot, xe2tot, xmtot, xm2tot
     real :: xmagnet, xenergy, xmag2, xener2
+    real :: energtot , magtot
+    real :: xenergtot , xmagtot
     real :: var_e, var_m, suscept, cv
 
     real :: ht, beta
@@ -34,6 +36,7 @@ program problema_ising
     
     integer :: n_changes
 
+    integer :: cuento
     ! Inicio generador nro random
     inquire(file='seed.dat',exist=es)
     if(es) then
@@ -119,6 +122,8 @@ program problema_ising
     ip(L) = 1
     im(1) = L
 
+    open(11, file='test.dat',status='unknown')
+
     open(3, file='ising.dat',status='unknown')
     open(4, file='fraccion_aceptados.dat',status='unknown')
     open(5, file='caloresp_suscept.dat',status='unknown')
@@ -131,6 +136,9 @@ program problema_ising
         xmtot = 0.
         xe2tot = 0.
         xm2tot = 0.
+
+        energtot = 0.
+        magtot = 0.
 
         n_changes = 0
         do imc=1, N_MC
@@ -182,6 +190,24 @@ program problema_ising
                     end if
                     !call plot_mapa(ier,mapa,L)
                 end do
+
+                
+                if(i_in>10)then
+                    sumep = 0.
+                    summp = 0.
+                    ! Calculo de energia y magnetizacion
+                    do j=1,L
+                        do i=1,L
+                            isum = mapa(im(i),j)+mapa(ip(i),j)+mapa(i,im(j))+mapa(i,ip(j))
+                            sumep = sumep - Jta*mapa(i,j)*isum - H*mapa(i,j)
+                            summp = summp + mapa(i,j)
+                        end do
+                    end do
+                    sumep = sumep*densidad          ! Energia interna
+                    summp = summp*densidad          ! Magnetizacion media por espin
+                    energtot = energtot + sumep
+                    magtot = magtot + abs(summp)      ! Para calcular la media de la magnetizacion
+                end if
             end do
             
             sumep = 0.
@@ -210,6 +236,9 @@ program problema_ising
 
         end do
 
+        write(11,*) T, energtot / (real(imc)*real(N_INTER-10)), magtot / (real(imc)*real(N_INTER-10))
+        !write(11,*) T, xenergtot / real(imc), xmagtot / real(imc)
+
         xenergy = xetot / real(imc) ! la media de la energia por spin
         xener2 = xe2tot / real(imc) ! la media de la energia cuadrada
 
@@ -228,11 +257,12 @@ program problema_ising
         write(3,*) T, sumep, xenergy, summp, xmagnet
         write(4,*) T, real(n_changes)/real(imc*area)
         write(5,*) T, var_e, var_m, cv, suscept
-        T = T + 0.1
+        T = T + 0.01
     end do
     close(3)
     close(4)
     close(5)
+    close(11)
 
     ! Escribir la última semilla para continuar con la cadena de numeros aleatorios 
     open(unit=10,file='seed.dat',status='unknown')
