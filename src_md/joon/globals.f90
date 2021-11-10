@@ -1,5 +1,8 @@
 module globals
-    real(kind=8), allocatable :: R(:,:), V(:,:), F(:,:) ! para representar posiciones, velocidades y fuerzas de N particulas
+    integer :: n ! Numero de atomos
+    integer :: c ! coordenadas
     real(kind=8) :: L, Vtot, T
-    integer :: N, D
+    real(kind=8), allocatable :: r(:,:) ! Posicion (3,n)
+    real(kind=8), allocatable :: v(:,:) ! velocidad (3,n)
+    real(kind=8), allocatable :: f(:,:) ! fuerza (3,n)
 end module globals

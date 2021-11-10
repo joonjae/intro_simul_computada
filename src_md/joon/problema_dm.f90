@@ -46,6 +46,7 @@ program problema_ising
     allocate(R(D,N), V(D,N), F(D,N))
 
     call init_posiciones(D,N)
+    print *, R(1,1)
     print *, R(1,2)
 !    call init_mapa(mapa,L)          ! inicio el mapa 
 !
