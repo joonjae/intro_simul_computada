@@ -40,14 +40,21 @@ program problema_dm
         L=10
     end if
     close(1)
-    print *,N_MC, T, n, c
+    print *,'Datos input:'
+    print *,'N_MC:',N_MC
+    print *,'T:',T
+    print *,'n:',n
+    print *,'c:',c
+    print *,''
     !----------------------------------------------------
 
     allocate(r(c,n), v(c,n), f(c,n))
 
+    print *,'Calculo las posiciones iniciales:'
     call verlet_posiciones()
     
     call fuerza(1.,1.)
+    print *,'Fuerzas:'
     do i=1,n
         print *,f(:,i)
     end do

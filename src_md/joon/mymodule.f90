@@ -20,9 +20,10 @@ subroutine verlet_posiciones()
 
     do i=1,n
         do j=1,c
-            R(j,i) = uni()*L
-            print *, j,i," - posicion: ",R(j,i)
+            r(j,i) = uni()*L
+            print *, j,i," - posicion: ",r(j,i)
         end do
+        print *,''
     end do
     return  
 end subroutine verlet_posiciones
@@ -43,7 +44,24 @@ subroutine fuerza(sigma,epsl)
     integer :: j,i
     real    :: d_sq, sr2, sr6, sr12
     real    :: v_r, v_sist
-    real, dimension(3) :: d
+    real, dimension(c) :: d
+!    real, allocatable(:,:) :: rp
+
+    ! para condiciones periodicas de contorno
+!    j = 0
+!    do i=1,n
+!        if(r(:,i)>L/2 .or. r)then
+!            j = j + 1 ! cuento cuantas particulas superan L/2
+!        end if
+!    end do
+!    allocate(rp(c,j))
+!    do i=1,n
+!        do j=1,c
+!            if(r(j,i)>L/2)then
+!                rp(j,i) = r(j,i)+L
+!            end if
+!        end do
+!    end do
 
     f = 0.
     do i=1,n - 1 ! particula i
@@ -62,6 +80,7 @@ subroutine fuerza(sigma,epsl)
 
             f(:,i) = f(:,i) + d * v_r
             f(:,j) = f(:,j) - d * v_r
+
         end do
     end do
 
