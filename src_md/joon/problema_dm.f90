@@ -1,4 +1,4 @@
-program problema_ising
+program problema_dm
     ! tareas y funciones de otro archivo
     use ziggurat
     use mymodule
@@ -29,40 +29,33 @@ program problema_ising
     if(es) then
         open(unit=1,file='input.dat',status='old')
         read(1,*)
-        read(1,*) N_MC, T, N, D, L
+        read(1,*) N_MC, T, n, c, L
         close(1)
 !        print *,"  * leyendo datos de input_ising.dat"
     else
         N_MC=1000
         T=1
-        N=4
-        D=3
+        n=4
+        c=3
         L=10
     end if
     close(1)
-    print *,N_MC, T, N, D
+    print *,N_MC, T, n, c
     !----------------------------------------------------
 
-    allocate(R(D,N), V(D,N), F(D,N))
+    allocate(r(c,n), v(c,n), f(c,n))
 
-    call init_posiciones(D,N)
-    print *, R(1,1)
-    print *, R(1,2)
-!    call init_mapa(mapa,L)          ! inicio el mapa 
-!
-!    area = L*L
-!    densidad = 1./real(area)    ! densidad de area
-!    pasos_mc = 1./real(N_MC)       ! densidad o pasos de monte carlo
-!
-!    allocate(ip(L))             ! reservo memoria para suma vecinos
-!    allocate(im(L))             ! reservo memoria para restar vecinos
-
+    call verlet_posiciones()
     
+    call fuerza(1.,1.)
+    do i=1,n
+        print *,f(:,i)
+    end do
 
     ! Escribir la última semilla para continuar con la cadena de numeros aleatorios 
     open(unit=10,file='seed.dat',status='unknown')
     seed = shr3() 
     write(10,*) seed
     close(10)
-end program problema_ising
+end program problema_dm
 
