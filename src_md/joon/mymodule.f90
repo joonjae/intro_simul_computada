@@ -5,7 +5,7 @@ MODULE mymodule
 
       PRIVATE
 
-      PUBLIC :: verlet_posiciones, fuerza
+      PUBLIC :: verlet_posiciones, fuerza, write_conf
 
 CONTAINS
 
@@ -45,23 +45,6 @@ subroutine fuerza(sigma,epsl)
     real    :: d_sq, sr2, sr6, sr12
     real    :: v_r, v_sist
     real, dimension(c) :: d
-!    real, allocatable(:,:) :: rp
-
-    ! para condiciones periodicas de contorno
-!    j = 0
-!    do i=1,n
-!        if(r(:,i)>L/2 .or. r)then
-!            j = j + 1 ! cuento cuantas particulas superan L/2
-!        end if
-!    end do
-!    allocate(rp(c,j))
-!    do i=1,n
-!        do j=1,c
-!            if(r(j,i)>L/2)then
-!                rp(j,i) = r(j,i)+L
-!            end if
-!        end do
-!    end do
 
     f = 0.
     do i=1,n - 1 ! particula i
@@ -87,5 +70,25 @@ subroutine fuerza(sigma,epsl)
     return
 end subroutine fuerza
 
+subroutine write_conf(mode)
+    implicit none
+    integer, intent (in)::mode
+    integer             ::i
+    
+    select case(mode)
+        case(0)
+            open(unit=20,file="movie.vtf",status="unknown")
+            write(20,*) "atom 0:99 radius 0.5 name Ar"
+        case(1)
+            write(20,*) "timestep"
+            write(20,*)
+            do i=1,n
+                write(20,*) r(:,i)
+            end do
+        case(2)
+            close(20)
+    end select
+
+end subroutine write_conf
 
 END MODULE mymodule

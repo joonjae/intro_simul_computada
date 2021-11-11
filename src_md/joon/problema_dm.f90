@@ -49,15 +49,20 @@ program problema_dm
     !----------------------------------------------------
 
     allocate(r(c,n), v(c,n), f(c,n))
+    call write_conf(0)
 
     print *,'Calculo las posiciones iniciales:'
     call verlet_posiciones()
+    
+    call write_conf(1)
     
     call fuerza(1.,1.)
     print *,'Fuerzas:'
     do i=1,n
         print *,f(:,i)
     end do
+
+    call write_conf(2)
 
     ! Escribir la última semilla para continuar con la cadena de numeros aleatorios 
     open(unit=10,file='seed.dat',status='unknown')
