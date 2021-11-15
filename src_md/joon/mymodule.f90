@@ -45,6 +45,7 @@ subroutine fuerza(sigma,epsl)
     real    :: d_sq, sr2, sr6, sr12
     real    :: v_r, v_sist
     real, dimension(c) :: d
+    real, dimension(c) :: fij
 
     f = 0.
     do i=1,n - 1 ! particula i
@@ -57,15 +58,22 @@ subroutine fuerza(sigma,epsl)
             sr6 = sr2**3
             sr12= sr6**2
 
-            v_r = 4*epsl * (sr12 - sr6)
+            v_r = (sr12 - sr6)
 
             v_sist = v_sist + v_r
 
-            f(:,i) = f(:,i) + d * v_r
-            f(:,j) = f(:,j) - d * v_r
+            ! f(r) = -DELTA(V_r) = -(d/dr) V_r * r_vector = 4*epsilon*(12*sigma^12/r^13 - 6*sigma^6/r^7) * r_vector
+            ! f(r) = 4*epsilon*6*(2*sigma^12/r^12 - sigma^6/r^2) * r_vector/r
+            ! f(r) = 24*epsilon * (2*sigma^12/r^12 - sigma^6/r^2) * r_vector/r
+            fij = (sr12 + v_r) * d/sqrt(d_sq)
+            f(:,i) = f(:,i) + fij
+            f(:,j) = f(:,j) - fij
 
         end do
     end do
+
+    v_sist = 4*epsl * v_sist
+    f = 24*epsl * f
 
     return
 end subroutine fuerza
@@ -78,7 +86,7 @@ subroutine write_conf(mode)
     select case(mode)
         case(0)
             open(unit=20,file="movie.vtf",status="unknown")
-            write(20,*) "atom 0:99 radius 0.5 name Ar"
+            write(20,*) "atom 0:99 radius 1 name Ar"
         case(1)
             write(20,*) "timestep"
             write(20,*)
