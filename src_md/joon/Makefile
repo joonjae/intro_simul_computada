@@ -18,4 +18,4 @@ $(exe):  $(OBJS) Makefile
 
 
 clean:
-	rm ./*.o ./*.mod	
+	rm ./*.o ./*.mod ./$(exe)
